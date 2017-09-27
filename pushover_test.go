@@ -6,7 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
+	"time"
 )
 
 // get pushoverUserToken, pushoverAPIToken from ENV
@@ -19,50 +20,64 @@ func getTokensFromEnv() (pushoverUserToken, pushoverAPIToken string, err error) 
 	return
 }
 
-func getNewHook() (hook *PushoverHook, err error) {
+func TestSync(t *testing.T) {
 	pushoverUserToken, pushoverAPIToken, err := getTokensFromEnv()
 	if err != nil {
 		println(err.Error())
 		os.Exit(0)
 	}
-	return NewPushoverHook(pushoverUserToken, pushoverAPIToken)
-}
 
-func TestSync(t *testing.T) {
-	hook, err := getNewHook()
-	if err != nil {
-		t.Error("expected err == nil, got", err)
-	}
-	msg := "test message"
+	hook := NewPushoverAsyncHook(pushoverAPIToken, pushoverUserToken)
+
+	msgOne := "message one"
+	//msgTwo := "message two"
+	//msgThree := "message three"
+
 	log := logrus.New()
 	log.Out = ioutil.Discard
 	log.Hooks.Add(hook)
-	log.WithFields(logrus.Fields{"withField": "1", "filterMe": "1"}).Error(msg)
+	log.WithFields(logrus.Fields{"withField": "1", "filterMe": "1"}).Error(msgOne)
+	//log.WithFields(logrus.Fields{"withField": "1", "filterMe": "1"}).Error(msgTwo)
+	//log.WithFields(logrus.Fields{"withField": "1", "filterMe": "1"}).Error(msgThree)
+	time.Sleep(time.Second * 5)
+
+	t.Log()
 }
 
-func TestAsync(t *testing.T) {
-	hook, err := getNewHook()
-	if err != nil {
-		t.Error("expected err == nil, got", err)
-	}
-	msg := "test message"
-	log := logrus.New()
-	log.Out = ioutil.Discard
-	log.Hooks.Add(hook)
-	log.WithFields(logrus.Fields{"withField": "1", "filterMe": "1"}).Error(msg)
-}
+//func TestAsync(t *testing.T) {
+//	userToken, appToken, err := getTokensFromEnv()
+//	if err != nil {
+//		println(err.Error())
+//		os.Exit(0)
+//	}
+//
+//	hook := NewPushoverAsyncHook(appToken, userToken, time.Second*3)
+//
+//	msgOne := "message one"
+//	msgTwo := "message two"
+//	msgThree := "message three"
+//
+//	log := logrus.New()
+//	log.Out = ioutil.Discard
+//	log.Hooks.Add(hook)
+//	log.WithFields(logrus.Fields{"withField": "1", "filterMe": "1"}).Error(msgOne)
+//	log.WithFields(logrus.Fields{"withField": "1", "filterMe": "1"}).Error(msgTwo)
+//	log.WithFields(logrus.Fields{"withField": "1", "filterMe": "1"}).Error(msgThree)
+//	time.Sleep(time.Second * 10)
+//
+//}
 
-func TestSetDuration(t *testing.T) {
-	hook, err := getNewHook()
-	if err != nil {
-		t.Error("expected err == nil, got", err)
-	}
-	err = hook.SetMuteDelay("blabla")
-	if err == nil {
-		t.Error("expected err != nil, got", err)
-	}
-	err = hook.SetMuteDelay("15m")
-	if err != nil {
-		t.Error("expected err == nil, got", err)
-	}
-}
+//func TestSetDuration(t *testing.T) {
+//	hook, err := getNewHook()
+//	if err != nil {
+//		t.Error("expected err == nil, got", err)
+//	}
+//	err = hook.SetMuteDelay("blabla")
+//	if err == nil {
+//		t.Error("expected err != nil, got", err)
+//	}
+//	err = hook.SetMuteDelay("15m")
+//	if err != nil {
+//		t.Error("expected err == nil, got", err)
+//	}
+//}
